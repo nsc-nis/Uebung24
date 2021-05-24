@@ -91,6 +91,7 @@ int main()
     {
         char* name = malloc(MAXLENGTH + 1);
         char* br = "\n";
+        char* cm = ",";
         int grade = 0;
 
         if(fp == NULL)
@@ -101,20 +102,7 @@ int main()
         else
             fgets(currentLine, MAXLENGTH + 1, fp);
 
-        /*
-        for (int i = 0; i < strlen(currentLine); ++i)
-        {
-            //statt "," ein Leerzeichen einfügen
-            if(currentLine[i] == ",")   //--> Funktioniert nicht so wie ich das möchte, keine Ahnung warum
-                name[i] = " ";
-            else
-                name[i] = currentLine[i];
-            //Katalognummern nicht anzeigen
-            if(!((int)currentLine[0]))
-                name[i] = currentLine[i];
-        }
-        */
-
+        int count = 0;
         for (int i = 0; i < strlen(currentLine); ++i)
         {
             if(currentLine[i] != br[0])
@@ -124,7 +112,7 @@ int main()
         bool isError = true;
         while(isError)
         {
-            printf("./GRADE/%s/", currentLine);
+            printf("./GRADE/%s/", name);
             fflush(stdin);
             scanf("%d", &grade);
 
@@ -145,51 +133,11 @@ int main()
         }
         if(grade != 0)
         {
-            /*
-            char* line = writeLine(currentLine, grade);
-            fputs(line, out);
-             */
-
             fprintf(out, "%s,%d\n", name, grade);
-
-             //--> In der Datei steht (mit Texteditor geöffnet)  statt der Note das Symbol , in LibreOffice ist gar keine Note da, ich hab keine Ahnung warum dass so ist
-             /*
-            char gradeC = (char)grade;
-            char* gradeS = malloc(sizeof (grade));
-            gradeS[0] = gradeC;
-
-            fputs(currentLine, out);
-            fputs(gradeS, out);
-            fputs("\n", out);
-            fputs("\0", out);
-              */
         }
     }
     if(fclose(out) == EOF)
         printf("* [ERROR] Could not save grades\n");
     else
         printf("* [OK] All grades saved to %s\n", outputFilename);
-}
-
-char* writeLine(char* string)
-{
-    char* line = malloc(MAXLENGTH + 1);
-
-    int i;
-    for (i = 0; i < strlen(string); ++i)
-    {
-        if(string[i] == "\0")
-            break;
-        else if(string[i] == "\n")  //--> Wie kann ich überprüfen, ob es einen Zeilenumbruch gibt?
-        {
-            //printf("\n test \n");
-            break;
-        }
-        else
-            line[i] = string[i];
-    }
-    ++i;
-    line[i] = "\0";
-
-    return line;
 }
