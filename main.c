@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 //define constants
 #define MAXLENGTH 255
@@ -20,62 +21,175 @@
 
 //declare variables
 
-
 //declare functions
-char* readLine(char* filename);
+char* writeLine(char* string);
 
 //main program
 int main()
 {
     //declare variables
-    char* filename = malloc(2048);
-    char* currentLine = "Hello";
+    char* inputFilename = malloc(2048);
+    char* inputFile = malloc(MAXLENGTH * 2);
+    char* outputFilename = malloc(2048);
+    char* outputFile = malloc(MAXLENGTH * 2);
+    char* currentLine = malloc(MAXLENGTH + 1);
+    bool isRunning = true;
+    bool isError = true;
 
+    inputFile = PATH;
+    outputFile = PATH;
+
+    //logo
     printf("***************************\n");
     printf("* Easy Student Grader 1.0 *\n");
     printf("***************************\n");
 
-    printf("* Please type in the filename:\n");
-    printf("./FILE/");
+    printf("* Please type in the filename of the input file:\n");
+    while(isError)
+    {
+        //Get name of input file
+        printf("./FILE/INPUT/");
+        fflush(stdin);
+        //scanf("%s", &inputFilename);
+        gets(inputFilename);
+
+        //add inputFilename to path of input folder
+        //strcat(inputFile, inputFilename); --> Funktioniert nicht
+
+
+        //check if input file is a csv-File
+        if (strstr(inputFilename, ".csv") == NULL)
+            printf("* [ERROR] Only .csv files are supported\n");
+        else
+        {
+            isError = false;
+            printf("* [OK] File read: %s\n", inputFilename);
+        }
+    }
+
+    //Get name of output file
+    printf("* Please type in the filename of the output file:\n");
+    printf("./FILE/OUTPUT/");
     fflush(stdin);
-    //scanf("%s", &filename);
-    gets(filename);
-    printf("\n%s\n", filename);
+    //scanf("%s", &inputFilename);
+    gets(outputFilename);
 
-    if(strstr(filename, ".csv") == NULL)
-        printf("* [ERROR] Only .csv files are supported\n");
+    //strcat(outputFile, outputFilename); --> Funktioniert nicht
+    printf("* [OK] Output file created\n");
+
+    //Create output file, open file stream
+    FILE *out;
+    out = fopen(outputFilename, "w");
+
+    //Read input file, open file stream
+    FILE *fp;
+    fp = fopen(inputFilename, "r");
+
+    printf("* Start grading your students with numbers from 1 to 5\n* Students who have no grade can get the number -1\n* Type in 0 to exit the program\n");
+
+    while (currentLine != NULL && isRunning) //Die Schleife wird nie beendet, auch nicht wenn ich currentLine != EOF mache :(
+    {
+        char* name = malloc(MAXLENGTH + 1);
+        char* br = "\n";
+        int grade = 0;
+
+        if(fp == NULL)
+        {
+            printf("* [ERROR] Could not open file\n");
+            break;
+        }
+        else
+            fgets(currentLine, MAXLENGTH + 1, fp);
+
+        /*
+        for (int i = 0; i < strlen(currentLine); ++i)
+        {
+            //statt "," ein Leerzeichen einfügen
+            if(currentLine[i] == ",")   //--> Funktioniert nicht so wie ich das möchte, keine Ahnung warum
+                name[i] = " ";
+            else
+                name[i] = currentLine[i];
+            //Katalognummern nicht anzeigen
+            if(!((int)currentLine[0]))
+                name[i] = currentLine[i];
+        }
+        */
+
+        for (int i = 0; i < strlen(currentLine); ++i)
+        {
+            if(currentLine[i] != br[0])
+                name[i] = currentLine[i];
+        }
+
+        bool isError = true;
+        while(isError)
+        {
+            printf("./GRADE/%s/", currentLine);
+            fflush(stdin);
+            scanf("%d", &grade);
+
+            if(grade == 0)
+            {
+                //Damit die Schleife nach dem letzten Schüler auch beendet wird, ansonsten wird der letzte Schüler einfach immer wieder angezeigt
+                //ich hab vieles probiert um das Problem zu lösen, hat alles nicht funktioniert :(
+                //z.B. hab ich versucht immer die letzte Zeile zu speichern und wenn die neue die selbe wie die alte ist aufzuhören. Das hat nicht funktioniert
+                printf("* [BREAK] \n");
+                //currentLine = NULL;
+                isRunning = false;
+                break;
+            }
+            else if(grade < -1 || grade > 5)
+                printf("* [ERROR] Only numbers from 1 to 5, -1 and 0 are possible inputs\n");
+            else
+                isError = false;
+        }
+        if(grade != 0)
+        {
+            /*
+            char* line = writeLine(currentLine, grade);
+            fputs(line, out);
+             */
+
+            fprintf(out, "%s,%d\n", name, grade);
+
+             //--> In der Datei steht (mit Texteditor geöffnet)  statt der Note das Symbol , in LibreOffice ist gar keine Note da, ich hab keine Ahnung warum dass so ist
+             /*
+            char gradeC = (char)grade;
+            char* gradeS = malloc(sizeof (grade));
+            gradeS[0] = gradeC;
+
+            fputs(currentLine, out);
+            fputs(gradeS, out);
+            fputs("\n", out);
+            fputs("\0", out);
+              */
+        }
+    }
+    if(fclose(out) == EOF)
+        printf("* [ERROR] Could not save grades\n");
     else
-        printf("* [OK] File read: %s\n", filename);
-
-    printf("%s", readLine(filename));
+        printf("* [OK] All grades saved to %s\n", outputFilename);
 }
 
-char* readLine(char* filename)
+char* writeLine(char* string)
 {
-    //declare variables
-    FILE *fp;
-    char* string = NULL;
-    char* file = PATH;
-    printf("\n%s\n", file);
-    printf("\n%s\n", filename);
+    char* line = malloc(MAXLENGTH + 1);
 
-    //get path to file
-    /*
-    printf("\nstrcat\n");
-    strcat(file, filename);
-    printf("%s", file);
-     */
-
-    //open file
-    fp = fopen(filename, "r");
-    if(fp == NULL)
+    int i;
+    for (i = 0; i < strlen(string); ++i)
     {
-        printf("* [ERROR] Could not open file\n");
-        return NULL;
+        if(string[i] == "\0")
+            break;
+        else if(string[i] == "\n")  //--> Wie kann ich überprüfen, ob es einen Zeilenumbruch gibt?
+        {
+            //printf("\n test \n");
+            break;
+        }
+        else
+            line[i] = string[i];
     }
-    else
-        fgets(string, MAXLENGTH, fp);
+    ++i;
+    line[i] = "\0";
 
-    //return
-    return string;
+    return line;
 }
