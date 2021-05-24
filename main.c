@@ -50,7 +50,6 @@ int main()
         //Get name of input file
         printf("./FILE/INPUT/");
         fflush(stdin);
-        //scanf("%s", &inputFilename);
         gets(inputFilename);
 
         //add inputFilename to path of input folder
@@ -71,7 +70,6 @@ int main()
     printf("* Please type in the filename of the output file:\n");
     printf("./FILE/OUTPUT/");
     fflush(stdin);
-    //scanf("%s", &inputFilename);
     gets(outputFilename);
 
     //strcat(outputFile, outputFilename); --> Funktioniert nicht
@@ -136,6 +134,7 @@ int main()
             fprintf(out, "%s,%d\n", name, grade);
         }
     }
+    fclose(fp);
     if(fclose(out) == EOF)
         printf("* [ERROR] Could not save grades\n");
     else
